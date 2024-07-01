@@ -7,11 +7,11 @@
 
 <div id="grid">
     <a href="/embedded" class="tab left" class:active={path === '/embedded'}>
-        Embedded
+        Home page
     </a>
 
     <a href="/http" class="tab right" class:active={path === '/http'}>
-        HTTP
+        Generate suplementary data
     </a>
 
     <div id="content">

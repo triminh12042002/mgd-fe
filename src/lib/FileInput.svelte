@@ -1,5 +1,5 @@
 <label class="button">
-    Open Image
+    Input your Image
     <input type="file" accept="image/*" multiple on:change />
 </label>
 
