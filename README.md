@@ -1,3 +1,8 @@
+Generative AI for Fashion Image Editing
+
+![AnimateMGDFLOW](https://github.com/triminh12042002/mgd-fe/assets/80403992/ca9d6058-0c0a-4be3-a7ad-31a940120cb2)
+
+
 # Pixlr API Example Application
 
 This repository contains an example application that utilizes the Pixlr API to perform various image editing tasks. The application is built using SvelteKit and demonstrates how to integrate Pixlr's functionality into a web application.
