@@ -9,8 +9,3 @@ export const load: Load = async ({ url }) => {
   const token = await createToken({ mode: 'embedded', origin });
   return { token };
 }
-
-export function _move() {
-  // ...
-  redirect(302, '/http'); // needs `throw` in v1
-}

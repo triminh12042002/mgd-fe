@@ -11,6 +11,7 @@
     let currentSketch: { open: boolean, file: File} = {};
     let frame: HTMLIFrameElement;
     let editor: Editor;
+    let sketch_cond_rate = 0.2;
 
     function filesChanged(e: Event) {
         const files = (e.target as HTMLInputElement)?.files;
@@ -40,7 +41,8 @@
         currentFiles[idx].open = true;
 
         for await (const newFile of editor.open(file)) {
-            currentFiles[idx] = { open: true, file: newFile };
+            //currentFiles[idx] = { open: true, file: newFile };
+            currentSketch = {open: false, file: newFile}
         }
 
         currentFiles[idx].open = false;
@@ -76,28 +78,22 @@
                     const fileData2 = event2.target?.result;
 
                     if (fileData1 && fileData2) {
-                        socket = new WebSocket('ws://127.0.0.1:8080/ws');
+                        socket = new WebSocket('ws://127.0.0.1:8080/generating');
                         socket.onopen = function() {
                             const message = {
-                                fileName1: currentSketch.file.name,
-                                fileData1: fileData1.toString().split(',')[1], // Extract base64 part
-                                fileName2: currentFiles[0].file.name,
-                                fileData2: fileData2.toString().split(',')[1], // Extract base64 part
-                                caption: description, // Your string data
+                                fileName1: currentFiles[0].file.name,
+                                fileData1: fileData2.toString().split(',')[1], // Extract base64 part
+                                fileName2: currentSketch.file.name,
+                                fileData2: fileData1.toString().split(',')[1], // Extract base64 part
+                                caption: description + ", " + description + ", " + description, // Your string data
+                                sketchCondRate: sketch_cond_rate,
                             };
                             console.log("Sending message:",message)
                             socket.send(JSON.stringify(message));
                         };
 
-                        socket.onmessage = function(event) {
-                            const message = JSON.parse(event.data);
-                            if (message.segmentationData && message.segmentationName) {
-                                const segmentationData = message.segmentationData;
-                                const segmentationBlob = b64toBlob(segmentationData, 'image/jpeg'); // Adjust MIME type as necessary
-                                const segmentationUrl = URL.createObjectURL(segmentationBlob);
-                                console.log("Receive Segmentation");
-                                displayImage(segmentationUrl); // Function to display the image in your UI
-                            }
+                        socket.onclose = () => {
+                            console.log('WebSocket connection closed');
                         };
                     }
                 };
@@ -114,34 +110,6 @@
         // Redirect to "/http"
         goto('/http');
     }
-
-
-    // Helper function to convert Base64 to Blob
-    function b64toBlob(b64Data: string, contentType: string) {
-        const byteCharacters = atob(b64Data);
-        const byteArrays = [];
-
-        for (let offset = 0; offset < byteCharacters.length; offset += 512) {
-            const slice = byteCharacters.slice(offset, offset + 512);
-            const byteNumbers = new Array(slice.length);
-            for (let i = 0; i < slice.length; i++) {
-                byteNumbers[i] = slice.charCodeAt(i);
-            }
-            const byteArray = new Uint8Array(byteNumbers);
-            byteArrays.push(byteArray);
-        }
-
-        return new Blob(byteArrays, { type: contentType });
-    }
-
-    // Function to display the image in your UI
-    function displayImage(imageUrl: string) {
-        const img = document.createElement('img');
-        img.src = imageUrl;
-        document.body.appendChild(img); // Adjust to append to the correct element
-    }
-
-
 </script>
 
 <section>
@@ -172,6 +140,12 @@
         <label class="button">
             Input your Sketch
             <input type="file" accept="image/*" on:change={sketchChange} />
+        </label>
+        <div>⠀</div>
+        <label>
+            Sketch condition rate
+            <input type="number" step=0.1 bind:value={sketch_cond_rate} min="0" max="1" />
+            <input type="range" step=0.1 bind:value={sketch_cond_rate} min="0" max="1" />
         </label>
 
         <div class="images">
